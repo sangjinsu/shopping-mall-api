@@ -7,9 +7,9 @@ type DBLayer interface {
 	Promotions() ([]models.Product, error)
 	CustomerByName(string, string) (models.Customer, error)
 	CustomerByID(int) (models.Customer, error)
-	Product(uint) (models.Product, error)
+	Product(int) (models.Product, error)
 	AddUser(models.Customer) (models.Customer, error)
-	SignIn(models.Customer) (models.Customer, error)
+	SignIn(email, pass string) (models.Customer, error)
 	SignOut(int) error
-	CustomerOrdersById(int) ([]models.Order, error)
+	CustomerOrdersByID(int) ([]models.Order, error)
 }
