@@ -1,7 +1,9 @@
 package rest
 
 import (
-	"github.com/gofiber/fiber"
+	"os"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func RunAPI(address string) error {
@@ -10,8 +12,11 @@ func RunAPI(address string) error {
 
 func RunAPIWithHandler(address string) error {
 	router := fiber.New()
-
-	handler, err := NewHandler()
+	dbUser := os.Getenv("USER")
+	dbPassword := os.Getenv("PASSWORD")
+	dbAddress := os.Getenv("DBADDRESS")
+	dsn := dbUser + ":" + dbPassword + "@tcp(" + dbAddress + ")/shoppingmallapi?charset=utf8mb4&parseTime=True&loc=Local"
+	handler, err := NewHandler(dsn)
 	if err != nil {
 		return err
 	}
@@ -24,10 +29,8 @@ func RunAPIWithHandler(address string) error {
 	user.Get("/:id/orders", handler.Orders)
 
 	users := router.Group("/users")
-	users.Post("/charge", handler.Charge)
 	users.Post("/signin", handler.SignIn)
 	users.Post("", handler.AddUser)
 
-	return router.Listen(address)
-
+	return router.ListenTLS(address, "./cert.pem", "./key.pem")
 }
