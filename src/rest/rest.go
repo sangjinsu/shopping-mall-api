@@ -6,12 +6,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func RunAPI(address string) error {
-	return RunAPIWithHandler(address)
+func RunAPI(app *fiber.App, address string) error {
+	return RunAPIWithHandler(app, address)
 }
 
-func RunAPIWithHandler(address string) error {
-	router := fiber.New()
+func RunAPIWithHandler(app *fiber.App, address string) error {
 	dbUser := os.Getenv("USER")
 	dbPassword := os.Getenv("PASSWORD")
 	dbAddress := os.Getenv("DBADDRESS")
@@ -21,16 +20,16 @@ func RunAPIWithHandler(address string) error {
 		return err
 	}
 
-	router.Get("/products", handler.Products)
-	router.Get("/promotions", handler.Promotions)
+	app.Get("/products", handler.Products)
+	app.Get("/promotions", handler.Promotions)
 
-	user := router.Group("/user")
+	user := app.Group("/user")
 	user.Post("/:id/signout", handler.SignOut)
 	user.Get("/:id/orders", handler.Orders)
 
-	users := router.Group("/users")
+	users := app.Group("/users")
 	users.Post("/signin", handler.SignIn)
 	users.Post("", handler.AddUser)
 
-	return router.ListenTLS(address, "./cert.pem", "./key.pem")
+	return nil
 }

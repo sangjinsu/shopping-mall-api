@@ -33,110 +33,89 @@ func NewHandler(dbname string) (*Handler, error) {
 
 func (h *Handler) Products(c *fiber.Ctx) error {
 	if h.db == nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": errors.New("server database error")})
-		return nil
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
 	products, err := h.db.Products()
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": err.Error()})
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	c.JSON(fiber.Map{"status": http.StatusOK, "products": products})
-	return nil
+	return c.Status(http.StatusOK).JSON(fiber.Map{"products": products})
 }
 
 func (h *Handler) Promotions(c *fiber.Ctx) error {
 	if h.db == nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": errors.New("server database error")})
-		return nil
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
 	promotions, err := h.db.Promotions()
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": err.Error()})
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
-	c.JSON(fiber.Map{"status": http.StatusOK, "promotions": promotions})
-	return nil
+	return c.Status(http.StatusOK).JSON(fiber.Map{"promotions": promotions})
 }
 
 func (h *Handler) SignIn(c *fiber.Ctx) error {
 	if h.db == nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": errors.New("server database error")})
-		return nil
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
 	var customer models.Customer
 	err := c.JSONP(&customer)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusBadRequest, "error": err.Error()})
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	customer, err = h.db.SignIn(customer.Email, customer.Pass)
 	if err != nil {
 		if err != dblayer.ErrINVALIDPASSWORD {
-			c.JSON(fiber.Map{"status": http.StatusForbidden, "error": err.Error()})
-			return err
+			return c.Status(http.StatusForbidden).JSON(fiber.Map{"error": err.Error()})
 		}
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": err.Error()})
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	c.JSON(fiber.Map{"status": http.StatusOK, "customer": customer})
-	return nil
+	return c.Status(http.StatusOK).JSON(fiber.Map{"customer": customer})
 }
 
 func (h *Handler) AddUser(c *fiber.Ctx) error {
 	if h.db == nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": errors.New("server database error")})
-		return nil
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
 	var customer models.Customer
 	err := c.JSONP(&customer)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusBadRequest, "error": err.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	customer, err = h.db.AddUser(customer)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": err.Error()})
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	c.JSON(fiber.Map{"status": http.StatusOK, "customer": customer})
-	return nil
+	return c.Status(http.StatusOK).JSON(fiber.Map{"customer": customer})
 }
 
 func (h *Handler) SignOut(c *fiber.Ctx) error {
 	if h.db == nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": errors.New("server database error")})
-		return nil
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
 	p := c.Params("id")
 	id, err := strconv.Atoi(p)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusBadRequest, "error": err.Error()})
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	err = h.db.SignOut(id)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": err.Error()})
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	return nil
+	return c.SendStatus(http.StatusOK)
 }
 
 func (h *Handler) Orders(c *fiber.Ctx) error {
 	if h.db == nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": errors.New("server database error")})
-		return nil
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": errors.New("server database error")})
 	}
 	p := c.Params("id")
 	id, err := strconv.Atoi(p)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusBadRequest, "error": err.Error()})
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	orders, err := h.db.CustomerOrdersByID(id)
 	if err != nil {
-		c.JSON(fiber.Map{"status": http.StatusInternalServerError, "error": err.Error()})
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	c.JSON(fiber.Map{"status": http.StatusOK, "orders": orders})
-	return nil
+	return c.Status(http.StatusOK).JSON(fiber.Map{"orders": orders})
 }
